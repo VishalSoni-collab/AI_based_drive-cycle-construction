@@ -6,7 +6,7 @@ The objective is to convert raw vehicle trajectory data into a compact speed-tim
 
 ---
 
-## Project overview
+## Research overview
 
 Driving cycles are widely used in vehicle energy analysis, emissions estimation, traffic-behavior studies, powertrain testing, and simulation work. A useful representative driving cycle should be shorter than the original raw driving record while still preserving the important statistical behavior of the source trip.
 
