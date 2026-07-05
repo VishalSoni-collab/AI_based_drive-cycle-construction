@@ -1,0 +1,29 @@
+# Python cache files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Jupyter notebook checkpoints
+.ipynb_checkpoints/
+
+# Local input data
+data/*.csv
+data/*.zip
+data/*.xlsx
+data/*.parquet
+
+# Pipeline outputs
+outputs/
+*.log
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
