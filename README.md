@@ -416,13 +416,12 @@ AI_based_drive-cycle-construction/
 ├── LICENSE
 ├── .gitignore
 │
-├── assets/
-│   ├── optimized_constructed_driving_cycle.png
-│   └── speed_bin_distribution.png
-│   
+└── assets/
+    ├── optimized_constructed_driving_cycle.png
+    └── speed_bin_distribution.png
 ```
 
-The `data/` folder is intended for local input files only. Raw VED data is not included in this repository.
+Raw input data and generated output files are not included in this repository. Users should download the dataset separately and provide the local CSV path when running the pipeline.
 
 ---
 
