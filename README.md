@@ -1,5 +1,3 @@
-I just make a readme so what you think:# Representative Driving Cycle Construction from VED Data
-
 This repository contains a Python pipeline for constructing a representative driving cycle from real-world vehicle speed-time data. The pipeline follows a microtrip-based workflow with 1 Hz resampling, acceleration cleaning, idle/moving-state detection, microtrip segmentation, feature extraction, PCA, K-means clustering, and optimized microtrip subset selection.
 
 The purpose of the project is to convert raw vehicle trajectory data into a compact speed-time driving cycle that preserves the main driving characteristics of the original trip, including mean speed, moving mean speed, idle time, acceleration/deceleration behavior, and speed-bin distribution.
