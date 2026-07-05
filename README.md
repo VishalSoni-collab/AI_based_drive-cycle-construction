@@ -456,11 +456,26 @@ The Fuzhou driving-cycle paper used K-means clustering and AMPSO for representat
 
 ## References
 
-1. G. S. Oh, D. J. LeBlanc, and H. Peng, **"Vehicle Energy Dataset (VED), A Large-scale Dataset for Vehicle Energy Consumption Research."** arXiv:1905.02081. https://arxiv.org/abs/1905.02081
-2. Vehicle Energy Dataset official repository. https://github.com/gsoh/VED
-3. **"Development of a Driving Cycle for Fuzhou Using K-Means and AMPSO."** Journal of Advanced Transportation, 2021. https://onlinelibrary.wiley.com/doi/10.1155/2021/5430137
-4. Y. He, **"Research on the construction method of vehicle driving cycle based on Mean Shift clustering."** arXiv:2008.05070. https://arxiv.org/abs/2008.05070
-5. **"Development of E-rickshaw driving cycle based on micro-trips technique."** Transportation Research Part D, 2021. https://www.sciencedirect.com/science/article/pii/S0386111221000297
+1. SFIEssential,  
+   **VED-Driving-Cycle-Dataset**  
+   GitHub repository.  
+   https://github.com/SFIEssential/VED-Driving-Cycle-Dataset
+
+2. G. S. Oh, D. J. LeBlanc, and H. Peng,  
+   **Vehicle Energy Dataset (VED), A Large-scale Dataset for Vehicle Energy Consumption Research**  
+   arXiv:1905.02081.  
+   https://arxiv.org/abs/1905.02081
+
+3. Minrui Zhao, Hongni Gao, Qi Han, Jiaang Ge, Wei Wang, and Jue Qu,  
+   **Development of a Driving Cycle for Fuzhou Using K-Means and AMPSO**  
+   Journal of Advanced Transportation, 2021.  
+   DOI: 10.1155/2021/5430137  
+   https://onlinelibrary.wiley.com/doi/10.1155/2021/5430137
+
+4. Yongjiang He,  
+   **Research on the construction method of vehicle driving cycle based on Mean Shift clustering**  
+   arXiv:2008.05070.  
+   https://arxiv.org/abs/2008.05070
 
 ---
 
