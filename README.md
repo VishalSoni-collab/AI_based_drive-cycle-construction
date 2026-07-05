@@ -419,11 +419,9 @@ AI_based_drive-cycle-construction/
 ├── assets/
 │   ├── optimized_constructed_driving_cycle.png
 │   └── speed_bin_distribution.png
-│
-├── results/
-│   ├── key_feature_comparison.csv
-│   ├── optimized_selected_microtrips.csv
-│   └── run_summary.json
+│   
+│   
+│   
 │
 └── data/
     └── README.md
