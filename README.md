@@ -32,13 +32,29 @@ The current demonstration constructs a 1198-second optimized representative driv
 
 ## Dataset and attribution
 
-This project uses the Vehicle Energy Dataset (VED) format. The Vehicle Energy Dataset was introduced by G. S. Oh, D. J. LeBlanc, and H. Peng as a large-scale real-world vehicle energy dataset. The dataset contains GPS trajectories and time-series vehicle data such as speed, fuel/energy use, and auxiliary power usage collected from personal vehicles in Ann Arbor, Michigan.
+This project uses the processed driving-cycle dataset from:
 
-Original dataset repository: https://github.com/gsoh/VED
+SFIEssential, **VED-Driving-Cycle-Dataset**  
+https://github.com/SFIEssential/VED-Driving-Cycle-Dataset
 
-Original dataset paper: G. S. Oh, D. J. LeBlanc, and H. Peng, **"Vehicle Energy Dataset (VED), A Large-scale Dataset for Vehicle Energy Consumption Research."** arXiv:1905.02081 https://arxiv.org/abs/1905.02081
+The dataset used here was not collected or created in this repository. It comes from the SFIEssential VED-Driving-Cycle-Dataset repository, which provides processed driving-cycle data derived from the Vehicle Energy Dataset (VED). According to the SFIEssential repository, the data processing focused on extracting driving-cycle records from VED, mainly for EV and PHEV trips, with a minimum cycle duration of 1800 seconds. The processed files include timestamp, latitude, longitude, vehicle speed, and elevation information.
 
-Important note: This repository does not claim ownership of the VED dataset. Raw VED data is not included in this repository. Users should download the original dataset from the official VED source and cite the original VED paper when using the data.
+The SFIEssential repository states that elevation was added using latitude and longitude through Open Topo Data.
+
+Original processed dataset repository:
+
+https://github.com/SFIEssential/VED-Driving-Cycle-Dataset
+
+Upstream VED dataset reference:
+
+G. S. Oh, D. J. LeBlanc, and H. Peng,  
+**Vehicle Energy Dataset (VED), A Large-scale Dataset for Vehicle Energy Consumption Research**  
+IEEE DataPort / arXiv:1905.02081  
+https://arxiv.org/abs/1905.02081
+
+Important note:
+
+This repository does not claim ownership of the SFIEssential VED-Driving-Cycle-Dataset or the original Vehicle Energy Dataset. Raw data is not included in this repository. Users should download the data from the original processed dataset source and cite both the processed dataset repository and the upstream VED dataset when appropriate.
 
 ---
 
