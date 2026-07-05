@@ -420,11 +420,6 @@ AI_based_drive-cycle-construction/
 │   ├── optimized_constructed_driving_cycle.png
 │   └── speed_bin_distribution.png
 │   
-│   
-│   
-│
-└── data/
-    └── README.md
 ```
 
 The `data/` folder is intended for local input files only. Raw VED data is not included in this repository.
