@@ -258,7 +258,7 @@ Useful optional arguments:
 
 ```bash
 python drive_cycle_pipeline.py \
-  --input data/cycle_v1.csv \
+  --input path/to/cycle_v1.csv \
   --output outputs \
   --target-duration 1200 \
   --idle-speed-kmh 1.0 \
