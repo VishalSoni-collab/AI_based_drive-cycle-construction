@@ -251,7 +251,7 @@ pip install -r requirements.txt
 Run the pipeline:
 
 ```bash
-python drive_cycle_pipeline.py --input data/cycle_v1.csv --output outputs --target-duration 1200
+python drive_cycle_pipeline.py --input path/to/cycle_v1.csv --output outputs --target-duration 1200
 ```
 
 Useful optional arguments:
