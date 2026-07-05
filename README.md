@@ -408,7 +408,7 @@ Figure interpretation:
 ## Repository structure
 
 ```text
-representative-drive-cycle-kmeans-ved/
+AI_based_drive-cycle-construction/
 │
 ├── drive_cycle_pipeline.py
 ├── requirements.txt
