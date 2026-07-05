@@ -367,13 +367,8 @@ Deceleration percentage error: 0.91%
 
 The final representative cycle is a 1198-second speed-time profile. It preserves the main stop-and-go, medium-speed, and higher-speed portions of the original data while reducing the raw trip into a compact representative cycle.
 
-Upload the image to:
 
-```text
-assets/optimized_constructed_driving_cycle.png
 ```
-
-Then the figure will render here:
 
 ![Optimized constructed driving cycle](assets/optimized_constructed_driving_cycle.png)
 
