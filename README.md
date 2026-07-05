@@ -405,7 +405,7 @@ Figure interpretation:
 
 ---
 
-## Recommended repository structure
+## Repository structure
 
 ```text
 representative-drive-cycle-kmeans-ved/
