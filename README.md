@@ -392,7 +392,6 @@ The speed-bin comparison shows how closely the optimized cycle matches the targe
 assets/speed_bin_distribution.png
 ```
 
-Then the figure will render here:
 
 ![Speed-bin distribution comparison](assets/speed_bin_distribution.png)
 
