@@ -1,19 +1,23 @@
-This repository contains a Python pipeline for constructing a representative driving cycle from real-world vehicle speed-time data. The pipeline follows a microtrip-based workflow with 1 Hz resampling, acceleration cleaning, idle/moving-state detection, microtrip segmentation, feature extraction, PCA, K-means clustering, and optimized microtrip subset selection.
+# Representative Driving Cycle Construction from VED Data
 
-The purpose of the project is to convert raw vehicle trajectory data into a compact speed-time driving cycle that preserves the main driving characteristics of the original trip, including mean speed, moving mean speed, idle time, acceleration/deceleration behavior, and speed-bin distribution.
+This repository contains a Python pipeline for constructing a representative driving cycle from real-world vehicle speed-time data. The pipeline follows a microtrip-based workflow with 1 Hz resampling, acceleration cleanup, idle/moving segmentation, feature extraction, PCA, K-means clustering, and optimized microtrip subset selection.
 
-## Project summary
+The objective is to convert raw vehicle trajectory data into a compact speed-time driving cycle that preserves the main driving characteristics of the original data, including mean speed, moving speed, idle percentage, acceleration/deceleration behavior, cruise behavior, and speed-bin distribution.
 
-Driving cycles are used in vehicle energy analysis, emissions estimation, powertrain evaluation, and traffic-behavior studies. A useful driving cycle should be shorter than the original raw driving record, but still representative of the original driving behavior.
+---
 
-This repository implements a full end-to-end construction pipeline:
+## Project overview
+
+Driving cycles are widely used in vehicle energy analysis, emissions estimation, traffic-behavior studies, powertrain testing, and simulation work. A useful representative driving cycle should be shorter than the original raw driving record while still preserving the important statistical behavior of the source trip.
+
+This repository implements a complete drive-cycle construction pipeline:
 
 ```text
 Raw VED-style CSV
 → column standardization
 → 1 Hz resampling
 → acceleration cleaning
-→ idle and moving-state detection
+→ idle/moving run detection
 → microtrip segmentation
 → feature extraction
 → PCA
@@ -22,36 +26,25 @@ Raw VED-style CSV
 → final representative driving cycle
 ```
 
-The current demonstration constructs an optimized 1198-second representative driving cycle while targeting a 1200-second final cycle.
+The current demonstration constructs a 1198-second optimized representative driving cycle with a target duration of 1200 seconds.
 
 ---
 
 ## Dataset and attribution
 
-This project uses data in the format of the Vehicle Energy Dataset (VED).
+This project uses the Vehicle Energy Dataset (VED) format. The Vehicle Energy Dataset was introduced by G. S. Oh, D. J. LeBlanc, and H. Peng as a large-scale real-world vehicle energy dataset. The dataset contains GPS trajectories and time-series vehicle data such as speed, fuel/energy use, and auxiliary power usage collected from personal vehicles in Ann Arbor, Michigan.
 
-The Vehicle Energy Dataset was introduced by G. S. Oh, D. J. LeBlanc, and H. Peng as a large-scale real-world vehicle energy dataset. It contains GPS trajectories and time-series vehicle signals such as speed, fuel/energy use, and auxiliary power usage collected from personal vehicles in Ann Arbor, Michigan.
+Original dataset repository: https://github.com/gsoh/VED
 
-Original VED dataset repository:
+Original dataset paper: G. S. Oh, D. J. LeBlanc, and H. Peng, **"Vehicle Energy Dataset (VED), A Large-scale Dataset for Vehicle Energy Consumption Research."** arXiv:1905.02081 https://arxiv.org/abs/1905.02081
 
-https://github.com/gsoh/VED
-
-Original VED dataset paper:
-
-G. S. Oh, D. J. LeBlanc, and H. Peng,  
-**Vehicle Energy Dataset (VED), A Large-scale Dataset for Vehicle Energy Consumption Research**  
-arXiv:1905.02081  
-https://arxiv.org/abs/1905.02081
-
-Important dataset note:
-
-This repository does not claim ownership of the VED dataset. Raw VED data is not included in this repository. Users should download the dataset from the official VED source and cite the original VED paper when using the data.
+Important note: This repository does not claim ownership of the VED dataset. Raw VED data is not included in this repository. Users should download the original dataset from the official VED source and cite the original VED paper when using the data.
 
 ---
 
 ## Input data format
 
-The pipeline expects a VED-style CSV file with the following columns:
+The pipeline expects a CSV file with VED-style columns:
 
 ```text
 VehId
@@ -69,46 +62,48 @@ Example local input path:
 data/cycle_v1.csv
 ```
 
-Raw data files are intentionally not tracked in this repository. The `.gitignore` file excludes local CSV data and generated output folders.
+Raw input data files are not tracked in this repository. The `.gitignore` file excludes local CSV data files and generated output folders.
 
 ---
 
 ## Methodology
 
-### 1. Column standardization
+### 1. Data loading and column standardization
 
-The input CSV is first loaded and the VED column names are mapped into simpler internal names.
+The input CSV is loaded and the VED column names are mapped into simpler internal names:
 
 ```text
-VehId                 → veh_id
-Trip                  → trip_id
-Timestamp(s)          → time_s
-Latitude[deg]         → lat
-Longitude[deg]        → lon
-Vehicle Speed[km/h]   → speed_kmh
-elevation[m]          → elevation_m
+VehId → veh_id
+Trip → trip_id
+Timestamp(s) → time_s
+Latitude[deg] → lat
+Longitude[deg] → lon
+Vehicle Speed[km/h] → speed_kmh
+elevation[m] → elevation_m
 ```
 
 Rows with missing or non-numeric required values are removed. The data is then sorted by vehicle ID, trip ID, and timestamp.
 
-### 2. Resampling to 1 Hz
+---
 
-Raw vehicle data can have irregular time intervals. For drive-cycle construction, a uniform time base is easier to work with and gives cleaner acceleration estimates.
+### 2. 1 Hz resampling
 
-Each trip is resampled to 1 Hz using linear interpolation. After this step, each row represents one second of driving.
+VED speed data may have irregular timestamp intervals. For drive-cycle construction, the trip is resampled to 1 Hz using linear interpolation. This creates a uniform time base where each row represents one second of driving.
 
-### 3. Acceleration cleaning
+---
 
-Acceleration is calculated from the resampled speed profile. Basic physical limits are then applied to reduce unrealistic spikes.
+### 3. Acceleration cleanup
 
-The default limits are:
+Acceleration is calculated from the 1 Hz speed profile. Basic physical limits are then applied to remove unrealistic spikes:
 
 ```text
-maximum acceleration:  +4.0 m/s²
-maximum deceleration:  -8.0 m/s²
+Maximum acceleration: +4.0 m/s²
+Maximum deceleration: -8.0 m/s²
 ```
 
-This step is not meant to over-smooth the trip. It only corrects points that exceed the defined acceleration bounds.
+This prevents timestamp noise or interpolation artifacts from affecting segmentation and feature extraction.
+
+---
 
 ### 4. Idle and moving-state detection
 
@@ -118,9 +113,11 @@ A point is treated as idle when:
 speed <= 1 km/h
 ```
 
-This is more robust than checking for exact zero speed, because real vehicle speed signals may contain small noise around zero.
+This threshold is more robust than checking for exact zero speed, since real vehicle signals often contain small noise around zero.
 
-The full trip is then split into continuous idle and moving runs.
+The speed-time series is then divided into continuous idle and moving runs.
+
+---
 
 ### 5. Microtrip segmentation
 
@@ -130,22 +127,22 @@ A microtrip is defined as:
 one moving run + the following idle run
 ```
 
-This keeps each driving fragment connected to the stop/idle period that follows it.
-
-Very small or uninformative fragments are removed using basic filters:
+Very small or uninformative fragments are removed using simple validity checks:
 
 ```text
-minimum microtrip duration: 10 s
-maximum idle duration inside a microtrip: 180 s
-minimum maximum speed: 10 km/h
-minimum distance: 0.01 km
+Minimum microtrip duration: 10 s
+Maximum idle duration inside microtrip: 180 s
+Minimum maximum speed: 10 km/h
+Minimum distance: 0.01 km
 ```
+
+This gives a set of usable driving segments for clustering and final cycle construction.
+
+---
 
 ### 6. Feature extraction
 
-Each valid microtrip is represented using a set of driving-behavior features.
-
-The extracted features include:
+Each valid microtrip is represented by driving-behavior features:
 
 ```text
 duration
@@ -170,7 +167,7 @@ The driving-mode percentages are mutually exclusive:
 idle + acceleration + deceleration + cruise = 100%
 ```
 
-Speed-bin percentages are calculated using the following bins:
+Speed-bin percentages are computed using these bins:
 
 ```text
 0–10 km/h
@@ -184,11 +181,11 @@ Speed-bin percentages are calculated using the following bins:
 80+ km/h
 ```
 
+---
+
 ### 7. PCA and K-means clustering
 
-The microtrip feature table is standardized and reduced using Principal Component Analysis (PCA). K-means clustering is then applied in PCA space.
-
-For the current implementation, the default number of clusters is three:
+The extracted microtrip features are standardized and reduced using Principal Component Analysis (PCA). K-means clustering is then applied in PCA space. For the current demonstration, three clusters are used:
 
 ```text
 low_speed
@@ -198,44 +195,38 @@ high_speed
 
 Cluster names are assigned based on the average moving speed of each cluster.
 
-### 8. Optimized microtrip subset selection
+---
 
-The final representative cycle is constructed by selecting a subset of valid microtrips.
+### 8. Optimized microtrip selection
 
-The optimizer tries to match the following target characteristics:
+The final representative cycle is built by selecting a subset of valid microtrips. The selection objective tries to match:
 
 ```text
-target duration
+target cycle duration
 mean speed
 mean moving speed
 speed standard deviation
-idle percentage
-acceleration percentage
-deceleration percentage
-cruise percentage
+idle / acceleration / deceleration / cruise percentages
 speed-bin distribution
 cluster duration proportions
-mean positive acceleration
-mean absolute deceleration
+acceleration/deceleration characteristics
 ```
 
-For small candidate sets, the script uses exhaustive subset search. This checks all valid combinations within the target duration window and selects the subset with the lowest score.
+For small candidate sets, the script uses exhaustive subset search. For larger candidate sets, it can fall back to random subset search. The current demonstration uses exhaustive subset search because the number of candidate microtrips is small enough to search directly.
 
-For larger candidate sets, the script can switch to random subset search.
+---
 
 ### 9. Final cycle stitching
 
-The selected microtrips are stitched together in chronological order. A short initial idle segment is added so the final driving cycle starts from rest.
+The selected microtrips are stitched together in chronological order. A short initial idle period is added so the cycle starts from rest. After stitching, transition acceleration is checked and cleaned again using the same acceleration bounds.
 
-After stitching, transition acceleration is checked and cleaned again using the same acceleration bounds.
-
-The final output is a clean representative speed-time driving cycle.
+The final output is a clean speed-time cycle ready for analysis or simulation.
 
 ---
 
 ## How to run
 
-Install the required Python packages:
+Install dependencies:
 
 ```bash
 pip install -r requirements.txt
@@ -251,41 +242,37 @@ Useful optional arguments:
 
 ```bash
 python drive_cycle_pipeline.py \
-  --input data/cycle_v1.csv \
-  --output outputs \
-  --target-duration 1200 \
-  --idle-speed-kmh 1.0 \
-  --n-clusters 3 \
-  --n-pcs 4
+  --input data/cycle_v1.csv \
+  --output outputs \
+  --target-duration 1200 \
+  --idle-speed-kmh 1.0 \
+  --n-clusters 3 \
+  --n-pcs 4
 ```
-
-If the main Python file has a different name in the repository, update the command accordingly.
 
 ---
 
 ## Main output files
 
-The pipeline writes outputs to the selected output folder.
-
-Important output files:
+The pipeline writes output files to the selected output folder. Important outputs:
 
 ```text
 FINAL_optimized_representative_drive_cycle.csv
 ```
 
-Final simplified driving cycle with time, speed, acceleration, and source microtrip labels.
+Final simplified speed-time cycle with time, speed, acceleration, and source microtrip information.
 
 ```text
 optimized_drive_cycle_full.csv
 ```
 
-Full final cycle with additional metadata, original timestamp references, source microtrip IDs, and cluster labels.
+Full final cycle with additional metadata, original timestamp references, and segment labels.
 
 ```text
 key_feature_comparison.csv
 ```
 
-Comparison between target driving characteristics and the optimized constructed cycle.
+Comparison between the target driving characteristics and the optimized constructed cycle.
 
 ```text
 optimized_selected_microtrips.csv
@@ -297,19 +284,19 @@ Microtrips selected for the final representative cycle.
 microtrip_features.csv
 ```
 
-Feature table for all valid microtrips.
+Extracted feature table for all valid microtrips.
 
 ```text
 microtrip_clusters.csv
 ```
 
-Microtrip feature table with PCA coordinates and K-means cluster labels.
+Microtrip features with PCA coordinates and K-means cluster labels.
 
 ```text
 cluster_summary.csv
 ```
 
-Summary of low-speed, medium-speed, and high-speed clusters.
+Summary of low-speed, medium-speed, and high-speed microtrip clusters.
 
 ```text
 top_search_results.csv
@@ -327,7 +314,7 @@ Compact summary of the full pipeline run.
 
 ## Key result
 
-The optimized cycle closely matches the target driving statistics.
+The optimized final cycle closely matches the target driving statistics.
 
 | Feature | Target | Optimized constructed | Absolute error | Percent error |
 |---|---:|---:|---:|---:|
@@ -342,55 +329,68 @@ The optimized cycle closely matches the target driving statistics.
 | Deceleration time (%) | 28.373 | 28.631 | 0.258 | 0.909% |
 | Cruise time (%) | 17.379 | 16.694 | -0.685 | -3.940% |
 | Mean positive acceleration (m/s²) | 0.674 | 0.678 | 0.004 | 0.607% |
-| Mean absolute deceleration (m/s²) | 0.674 | 0.673 | -0.001 | -0.083% |
+| Mean deceleration magnitude (m/s²) | 0.674 | 0.673 | -0.001 | -0.083% |
 | Acceleration standard deviation (m/s²) | 0.716 | 0.706 | -0.010 | -1.453% |
 
-Compact result summary:
+Compact summary:
 
 ```text
-target duration: 1200 s
-final duration: 1198 s
-distance error: 0.42%
-mean speed error: 0.25%
-moving mean speed error: 0.02%
-idle percentage error: 0.67%
-acceleration percentage error: 0.89%
-deceleration percentage error: 0.91%
+Target duration: 1200 s
+Final duration: 1198 s
+Mean speed error: 0.25%
+Moving mean speed error: 0.02%
+Distance error: 0.42%
+Idle percentage error: 0.67%
+Acceleration percentage error: 0.89%
+Deceleration percentage error: 0.91%
 ```
 
 ---
 
 ## Optimized constructed driving cycle
 
-The final representative cycle is a 1198-second speed-time profile. It preserves the main stop-and-go, medium-speed, and higher-speed driving portions while compressing the original trip into a shorter representative cycle.
+The final representative cycle is a 1198-second speed-time profile. It preserves the main stop-and-go, medium-speed, and higher-speed portions of the original data while reducing the raw trip into a compact representative cycle.
 
-To show this figure in the README, place the image at:
+Upload the image to:
 
 ```text
 assets/optimized_constructed_driving_cycle.png
 ```
 
-Then this Markdown image link will display it:
+Then the figure will render here:
 
 ![Optimized constructed driving cycle](assets/optimized_constructed_driving_cycle.png)
 
+Figure interpretation:
+
+- The cycle starts with a short idle period.
+- Several stop-and-go segments appear in the low-speed and medium-speed regions.
+- Higher-speed portions are retained around the middle and later parts of the cycle.
+- The final cycle remains close to the 1200-second target duration while maintaining the main speed-time behavior of the original trip.
+
 ---
 
-## Speed-bin distribution comparison
+## Speed-bin distribution
 
-The speed-bin comparison shows how the constructed cycle matches the original target distribution across different speed ranges.
+The speed-bin comparison shows how closely the optimized cycle matches the target/original distribution across different speed ranges.
 
-The low-speed and higher-speed ranges are captured reasonably well. The main remaining mismatch appears around the 20–50 km/h range, where the optimized cycle slightly overrepresents 20–40 km/h and underrepresents 40–50 km/h. This is expected in a single-trip demonstration with a limited number of available candidate microtrips.
-
-To show this figure in the README, place the image at:
+Upload the image to:
 
 ```text
 assets/speed_bin_distribution.png
 ```
 
-Then this Markdown image link will display it:
+Then the figure will render here:
 
 ![Speed-bin distribution comparison](assets/speed_bin_distribution.png)
+
+Figure interpretation:
+
+- The low-speed 0–10 km/h region is captured reasonably well.
+- The 50–80 km/h portions are also represented well overall.
+- The main remaining mismatch appears in the 20–50 km/h range.
+- The constructed cycle slightly overrepresents 20–40 km/h and underrepresents 40–50 km/h.
+- This is expected for a single-trip demonstration with a limited number of candidate microtrips.
 
 ---
 
@@ -406,96 +406,53 @@ representative-drive-cycle-kmeans-ved/
 ├── .gitignore
 │
 ├── assets/
-│   ├── optimized_constructed_driving_cycle.png
-│   └── speed_bin_distribution.png
+│   ├── optimized_constructed_driving_cycle.png
+│   └── speed_bin_distribution.png
 │
 ├── results/
-│   ├── key_feature_comparison.csv
-│   ├── optimized_selected_microtrips.csv
-│   └── run_summary.json
+│   ├── key_feature_comparison.csv
+│   ├── optimized_selected_microtrips.csv
+│   └── run_summary.json
 │
 └── data/
-    └── README.md
+    └── README.md
 ```
 
 The `data/` folder is intended for local input files only. Raw VED data is not included in this repository.
 
 ---
 
-## Notes on uploaded results
-
-Only the most important result files should be uploaded to the repository.
-
-Recommended result files:
-
-```text
-results/key_feature_comparison.csv
-results/optimized_selected_microtrips.csv
-results/run_summary.json
-```
-
-Recommended image files:
-
-```text
-assets/optimized_constructed_driving_cycle.png
-assets/speed_bin_distribution.png
-```
-
-Intermediate files such as full cleaned time-series data, all phase-wise outputs, and raw input CSV files are not required in the repository.
-
----
-
 ## Scope and limitations
 
-This repository is intended as a reproducible research-code pipeline for representative driving-cycle construction.
-
-Current limitations:
+This repository is intended as a reproducible research-code pipeline for representative driving-cycle construction. Current limitations:
 
 - The demonstration result is based on one VED-style trip file.
-- The method is designed to scale to more trips, where microtrip diversity and cluster stability should improve.
-- The optimizer uses exhaustive subset search for small candidate sets and random subset search for larger candidate sets.
-- This repository does not implement AMPSO.
-- GPS coordinates are included in the input structure but are not map-matched.
+- The pipeline is designed to scale to more trips, where clustering and microtrip diversity should improve.
+- The method uses PCA, K-means clustering, and exhaustive subset optimization; it does not implement AMPSO.
+- GPS coordinates are used mainly as part of the input structure and are not map-matched.
 - The final cycle is a research/analysis cycle, not an official regulatory driving cycle.
-- Output quality depends on input trip diversity, selected thresholds, and target duration.
+- Output quality depends on input trip diversity, threshold settings, and target duration.
 
 ---
 
 ## Relation to previous driving-cycle methods
 
-This implementation follows the general idea of microtrip-based representative driving-cycle construction.
+The implementation follows the general idea of microtrip-based representative driving-cycle construction. The workflow is also influenced by clustering and optimization-based approaches used in previous drive-cycle studies.
 
-The Fuzhou driving-cycle study used K-means clustering and AMPSO for representative driving-cycle development. This repository uses a related clustering-based structure, but the final selection step is implemented using exhaustive subset optimization for small candidate sets.
-
-This choice is intentional. For the current demonstration size, exhaustive subset search is direct, reproducible, and sufficient.
+The Fuzhou driving-cycle paper used K-means clustering and AMPSO for representative cycle development. This repository uses a related clustering-based structure, but replaces AMPSO with exhaustive subset search for small candidate sets. This difference is intentional. For the current dataset size, exhaustive subset search is direct, reproducible, and sufficient.
 
 ---
 
 ## References
 
-1. G. S. Oh, D. J. LeBlanc, and H. Peng,  
-   **Vehicle Energy Dataset (VED), A Large-scale Dataset for Vehicle Energy Consumption Research**  
-   arXiv:1905.02081  
-   https://arxiv.org/abs/1905.02081
-
-2. Vehicle Energy Dataset official repository  
-   https://github.com/gsoh/VED
-
-3. Minrui Zhao, Hongni Gao, Qi Han, Jiaang Ge, Wei Wang, and Jue Qu,  
-   **Development of a Driving Cycle for Fuzhou Using K-Means and AMPSO**  
-   Journal of Advanced Transportation, 2021  
-   DOI: 10.1155/2021/5430137  
-   https://onlinelibrary.wiley.com/doi/10.1155/2021/5430137
-
-4. Yongjiang He,  
-   **Research on the construction method of vehicle driving cycle based on Mean Shift clustering**  
-   arXiv:2008.05070  
-   https://arxiv.org/abs/2008.05070
+1. G. S. Oh, D. J. LeBlanc, and H. Peng, **"Vehicle Energy Dataset (VED), A Large-scale Dataset for Vehicle Energy Consumption Research."** arXiv:1905.02081. https://arxiv.org/abs/1905.02081
+2. Vehicle Energy Dataset official repository. https://github.com/gsoh/VED
+3. **"Development of a Driving Cycle for Fuzhou Using K-Means and AMPSO."** Journal of Advanced Transportation, 2021. https://onlinelibrary.wiley.com/doi/10.1155/2021/5430137
+4. Y. He, **"Research on the construction method of vehicle driving cycle based on Mean Shift clustering."** arXiv:2008.05070. https://arxiv.org/abs/2008.05070
+5. **"Development of E-rickshaw driving cycle based on micro-trips technique."** Transportation Research Part D, 2021. https://www.sciencedirect.com/science/article/pii/S0386111221000297
 
 ---
 
 ## License
 
-The code in this repository is released under the MIT License.
-
-The VED dataset is not owned by this repository. Please follow the original dataset license and citation requirements from the official VED source.
+The code in this repository is released under the MIT License. The VED dataset is not owned by this repository. Please follow the original dataset license and citation requirements from the official VED source.
