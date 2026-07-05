@@ -387,7 +387,6 @@ Figure interpretation:
 
 The speed-bin comparison shows how closely the optimized cycle matches the target/original distribution across different speed ranges.
 
-Upload the image to:
 
 ```text
 assets/speed_bin_distribution.png
