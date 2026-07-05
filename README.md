@@ -32,7 +32,7 @@ The current demonstration constructs a 1198-second optimized representative driv
 
 ## Dataset and attribution
 
-This project uses the processed driving-cycle dataset from:
+This research uses the processed driving-cycle dataset from:
 
 SFIEssential, **VED-Driving-Cycle-Dataset**  
 https://github.com/SFIEssential/VED-Driving-Cycle-Dataset
