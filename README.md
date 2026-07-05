@@ -439,18 +439,18 @@ This repository is intended as a reproducible research-code pipeline for represe
 
 - The demonstration result is based on one VED-style trip file.
 - The pipeline is designed to scale to more trips, where clustering and microtrip diversity should improve.
-- The method uses PCA, K-means clustering, and exhaustive subset optimization; it does not implement AMPSO.
+- The current implementation uses PCA, K-means clustering, and exhaustive subset optimization for representative microtrip selection.
 - GPS coordinates are used mainly as part of the input structure and are not map-matched.
-- The final cycle is a research/analysis cycle, not an official regulatory driving cycle.
+- The final cycle is intended for research and analysis, not for regulatory certification or official emissions/fuel-economy testing.
 - Output quality depends on input trip diversity, threshold settings, and target duration.
 
 ---
 
 ## Relation to previous driving-cycle methods
 
-The implementation follows the general idea of microtrip-based representative driving-cycle construction. The workflow is also influenced by clustering and optimization-based approaches used in previous drive-cycle studies.
+This implementation follows the general idea of microtrip-based representative driving-cycle construction. The workflow is also influenced by clustering and optimization-based approaches used in previous drive-cycle studies.
 
-The Fuzhou driving-cycle paper used K-means clustering and AMPSO for representative cycle development. This repository uses a related clustering-based structure, but replaces AMPSO with exhaustive subset search for small candidate sets. This difference is intentional. For the current dataset size, exhaustive subset search is direct, reproducible, and sufficient.
+This repository uses a clustering-based structure with exhaustive subset search for representative microtrip selection. For the current dataset size, exhaustive subset search is direct, reproducible, and sufficient.
 
 ---
 
